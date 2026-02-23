@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>글 보기</title>
+    <link rel="stylesheet" th:href="@{/css/naver-style.css}"/>
+    <style>
+        .nv-view-meta { color: #888; margin-bottom: 20px; font-size: 13px; }
+        .nv-view-content { white-space: pre-wrap; padding: 20px; background: #f8f9fa; border: 1px solid #e4e8eb; border-radius: 4px; min-height: 120px; line-height: 1.6; }
+        .nv-view-actions { margin-top: 24px; }
+        .nv-view-actions a, .nv-view-actions button { margin-right: 8px; }
+        .nv-comments { margin-top: 28px; padding-top: 20px; border-top: 1px solid #e4e8eb; }
+        .nv-comment { padding: 12px 0; border-bottom: 1px solid #e4e8eb; font-size: 14px; }
+        .nv-comment:last-child { border-bottom: none; }
+        .nv-attachments { margin: 12px 0; }
+        .nv-attachments a { margin-right: 12px; }
+        #commentContent { min-height: 70px; margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+<div class="nv-wrap">
+    <div class="nv-header">
+        <a href="/board/list" class="nv-logo">게시판</a>
+    </div>
+    <h1 th:utext="${board.title}">제목</h1>
+    <div class="nv-view-meta">
+        작성자: <span th:text="${board.writerId}">writer</span> |
+        <span th:text="${board.createdAt}">날짜</span>
+    </div>
+    <div class="nv-view-content" th:utext="${board.content}">내용</div>
+
+    <div class="nv-attachments" th:if="${board.attachments != null && !board.attachments.isEmpty()}">
+        <strong>첨부파일:</strong>
+        <span th:each="a : ${board.attachments}">
+            <a th:href="@{/file/download/{id}(id=${a.id})}" th:text="${a.originalName}">파일</a>
+        </span>
+    </div>
+    <div th:if="${session.userId == board.writerId}" class="upload-form" style="margin-top:12px;">
+        <form id="uploadForm">
+            <input type="hidden" name="boardId" th:value="${board.id}"/>
+            <input type="file" name="file" id="fileInput"/>
+            <button type="button" id="btnUpload" class="secondary">파일 첨부</button>
+        </form>
+    </div>
+
+    <div class="nv-view-actions">
+        <a th:href="@{/board/list}">목록</a>
+        <a th:if="${session.userId == board.writerId}" th:href="@{/board/edit/{id}(id=${board.id})}">수정</a>
+        <form th:if="${session.userId == board.writerId}" th:action="@{/board/delete/{id}(id=${board.id})}" method="post" style="display:inline;">
+            <button type="submit" class="secondary">삭제</button>
+        </form>
+    </div>
+
+    <div class="nv-comments">
+        <h3>댓글</h3>
+        <div id="commentList"></div>
+        <div style="margin-top:12px;">
+            <textarea id="commentContent" rows="3" placeholder="댓글 입력"></textarea>
+            <button type="button" id="btnAddComment">등록</button>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    const boardId = /*[[${board.id}]]*/ 0;
+    const listEl = document.getElementById('commentList');
+    const contentEl = document.getElementById('commentContent');
+    const btnAdd = document.getElementById('btnAddComment');
+
+    function loadComments() {
+        fetch('/api/comment/list?boardId=' + boardId, { credentials: 'same-origin' })
+            .then(r => r.ok ? r.json() : [])
+            .then(arr => {
+                listEl.innerHTML = arr.map(c => {
+                    const div = document.createElement('div');
+                    div.className = 'nv-comment';
+                    div.innerHTML = '<strong>' + (c.writerId || '') + '</strong> ' + (c.content || '') + ' <span class="nv-muted">' + (c.createdAt || '') + '</span>';
+                    return div.outerHTML;
+                }).join('');
+            });
+    }
+    loadComments();
+
+    document.getElementById('btnUpload').addEventListener('click', function() {
+        const form = document.getElementById('uploadForm');
+        const fd = new FormData();
+        fd.append('boardId', boardId);
+        const fileInput = document.getElementById('fileInput');
+        if (fileInput.files.length === 0) { alert('파일을 선택하세요.'); return; }
+        fd.append('file', fileInput.files[0]);
+        fetch('/file/upload', { method: 'POST', credentials: 'same-origin', body: fd })
+            .then(r => r.json()).then(data => { if (data.success) location.reload(); });
+    });
+
+    btnAdd.addEventListener('click', function() {
+        const content = contentEl.value.trim();
+        if (!content) return;
+        const form = new URLSearchParams();
+        form.append('boardId', boardId);
+        form.append('content', content);
+        fetch('/api/comment/add', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: form
+        }).then(r => r.json()).then(data => {
+            if (data.success) {
+                contentEl.value = '';
+                loadComments();
+            }
+        });
+    });
+</script>
+</body>
+</html>

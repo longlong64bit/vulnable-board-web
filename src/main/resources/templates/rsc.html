@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>게시판 스트리밍 | 게시판</title>
+    <link rel="stylesheet" th:href="@{/css/naver-style.css}"/>
+    <style>
+        .rsc-intro { background: #f8f9fa; padding: 16px 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #03C75A; }
+        .rsc-card { border: 1px solid #e4e8eb; border-radius: 8px; padding: 16px; margin: 16px 0; background: #fff; }
+        .rsc-card h3 { margin: 0 0 8px 0; font-size: 15px; color: #03C75A; }
+        .rsc-card p { margin: 0; color: #555; font-size: 13px; }
+        .rsc-nav { margin-top: 24px; padding-top: 16px; border-top: 1px solid #e4e8eb; }
+        .rsc-nav a { margin-right: 16px; }
+        code { background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+    </style>
+</head>
+<body>
+<div class="nv-wrap">
+    <div class="nv-header">
+        <div class="nv-header-main">
+            <a href="/board" class="nv-logo">게시판</a>
+            <div class="nv-user">
+                <a href="/board">목록</a>
+                <a href="/board/write">글쓰기</a>
+            </div>
+        </div>
+    </div>
+
+    <h1>게시판 스트리밍</h1>
+    <p class="nv-muted">게시판 콘텐츠를 React Server Components(RSC) 스트림으로 제공합니다. 모바일 앱·외부 연동 시 사용합니다.</p>
+
+    <div class="rsc-intro">
+        로그인한 상태에서 게시판 목록·글을 조회할 때, 서버가 RSC 스트림으로 응답합니다. 아래 API로 직접 스트림을 요청할 수 있습니다.
+    </div>
+
+    <h2>연동 API</h2>
+    <div class="rsc-card">
+        <h3>스트림 렌더</h3>
+        <p><code>POST /api/rsc/render</code> — 게시판에서 사용하는 RSC 스트림을 역직렬화합니다. Body: <code>Content-Type: text/x-component</code></p>
+    </div>
+    <div class="rsc-card">
+        <h3>스트림 재생</h3>
+        <p><code>POST /api/rsc/replay</code> — 수신한 스트림을 서버에서 재생(검증용). Body 형식은 위와 동일합니다.</p>
+    </div>
+
+    <p class="nv-muted" style="margin-top: 24px;">외부 시스템 연동·테스트 시 위 엔드포인트를 POST로 호출하세요. GET으로 접속하면 이 안내 페이지로 이동합니다.</p>
+
+    <div class="rsc-nav">
+        <a href="/board" class="nv-btn">목록으로</a>
+        <a href="/board/write" class="nv-btn">글쓰기</a>
+    </div>
+</div>
+</body>
+</html>

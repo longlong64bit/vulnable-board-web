@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>글쓰기</title>
+    <link rel="stylesheet" th:href="@{/css/naver-style.css}"/>
+    <style>
+        .nv-form-wrap { max-width: 700px; }
+        .nv-form-wrap textarea { min-height: 220px; }
+        .nv-form-wrap button { margin-top: 16px; }
+    </style>
+</head>
+<body>
+<div class="nv-wrap">
+    <div class="nv-header">
+        <a href="/board/list" class="nv-logo">게시판</a>
+    </div>
+    <div class="nv-form-wrap">
+        <h1>글쓰기</h1>
+        <form method="post" action="/board/write">
+            <label>제목</label>
+            <input type="text" name="title" required/>
+            <label>내용</label>
+            <textarea name="content"></textarea>
+            <button type="submit">등록</button>
+        </form>
+        <p style="margin-top:16px;"><a href="/board/list">목록</a></p>
+    </div>
+</div>
+</body>
+</html>

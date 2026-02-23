@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>게시판</title>
+    <link rel="stylesheet" th:href="@{/css/naver-style.css}"/>
+    <style>
+        .nv-list-actions { margin-top: 20px; }
+        .nv-list-actions a { margin-right: 12px; }
+    </style>
+</head>
+<body>
+<div class="nv-wrap">
+    <div class="nv-header">
+        <div class="nv-header-main">
+            <a href="/board/list" class="nv-logo">NAVER BOARD</a>
+            <div class="nv-user">
+                <span th:text="${session.userName != null ? session.userName + '님' : ''}">회원</span>
+                <a href="/logout">로그아웃</a>
+            </div>
+        </div>
+        <form method="get" action="/board/list" class="nv-search-hero">
+            <input type="text" name="keyword" th:value="${keyword}" placeholder="검색어를 입력하세요"/>
+            <input type="hidden" name="orderBy" th:value="${orderBy}"/>
+            <button type="submit">검색</button>
+        </form>
+        <div class="nv-quick">
+            <a th:href="@{/board/write}">글쓰기</a>
+            <a th:href="@{/admin}">관리자</a>
+            <a th:href="@{/ssti}">SSTI</a>
+        </div>
+    </div>
+    <p th:if="${message}" th:text="${message}">메시지</p>
+    <!-- Reflected XSS: keyword를 이스케이프 없이 출력 -->
+    <p th:if="${keyword}" class="nv-muted" th:utext="'검색어: ' + ${keyword}">검색어</p>
+    <table class="nv-table">
+        <thead>
+        <tr>
+            <th>번호</th>
+            <th>제목</th>
+            <th>작성자</th>
+            <th>작성일</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="b : ${list}">
+            <td th:text="${b.id}">1</td>
+            <td><a th:href="@{/board/view/{id}(id=${b.id})}" th:utext="${b.title}">제목</a></td>
+            <td th:text="${b.writerId}">writer</td>
+            <td th:text="${b.createdAt}">날짜</td>
+        </tr>
+        </tbody>
+    </table>
+    <div class="nv-list-actions">
+        <a th:href="@{/board/write}" class="nv-btn">글쓰기</a>
+    </div>
+</div>
+</body>
+</html>

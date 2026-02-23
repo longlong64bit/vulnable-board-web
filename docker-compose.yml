@@ -1,0 +1,85 @@
+# 프로젝트 이름 고정 (폴더명이 숫자로 시작하면 이미지 이름이 invalid reference가 됨)
+name: vulnboard
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: vuln-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: vulndb
+      MYSQL_USER: vuln
+      MYSQL_PASSWORD: vuln
+    # ports 미노출 → 같은 Docker 네트워크 내부(app)에서만 mysql:3306 접근 가능
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  app:
+    build: .
+    container_name: vuln-board
+    ports:
+      - "8888:8080"
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: vulndb
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+    volumes:
+      - upload_data:/app/uploads
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  frontend:
+    image: node:20-alpine
+    container_name: vuln-frontend
+    working_dir: /app
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_PROXY_TARGET: http://app:8080
+    volumes:
+      - ./frontend:/app
+    command: sh -c "npm install && npm run dev"
+    depends_on:
+      - app
+
+  frontend-rsc:
+    build:
+      context: .
+      dockerfile: frontend-rsc/Dockerfile
+    container_name: vuln-frontend-rsc
+    ports:
+      - "5174:5174"
+    volumes:
+      - ./frontend-rsc:/app
+    environment:
+      NODE_ENV: development
+    command: sh -c "npm install && npm run dev"
+    depends_on:
+      - app
+
+  # CVE-2025-55182 PoC — Docker 안에서 실행 (같은 네트워크에서 app:8080 호출)
+  poc:
+    image: python:3-alpine
+    container_name: vuln-poc
+    working_dir: /poc
+    volumes:
+      - ./poc:/poc
+    command: ["python", "cve-2025-55182-poc.py", "--url", "http://app:8080/api/rsc/render"]
+    depends_on:
+      - app
+      - frontend-rsc
+    profiles:
+      - poc
+
+volumes:
+  mysql_data:
+  upload_data:

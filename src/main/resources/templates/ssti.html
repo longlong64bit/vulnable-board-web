@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>SSTI 테스트</title>
+    <link rel="stylesheet" th:href="@{/css/naver-style.css}"/>
+    <style>
+        code { background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+    </style>
+</head>
+<body>
+<div class="nv-wrap">
+    <div class="nv-header">
+        <a href="/board/list" class="nv-logo">게시판</a>
+    </div>
+    <!-- 취약: Thymeleaf 전처리 __${name}__ → name 값이 표현식으로 평가됨 (SSTI) -->
+    <h1>Hello, <span th:utext="${__${name}__}">guest</span></h1>
+    <p class="nv-muted">취약: name 파라미터에 Thymeleaf 표현식을 넣으면 서버에서 실행됩니다. 예: <code>7*7</code> → 49</p>
+    <p><a href="/board/list">목록</a> · <a href="/rsc">RSC API</a></p>
+</div>
+</body>
+</html>

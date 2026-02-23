@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>관리자</title>
+    <link rel="stylesheet" th:href="@{/css/naver-style.css}"/>
+</head>
+<body>
+<div class="nv-wrap">
+    <div class="nv-header">
+        <a href="/board/list" class="nv-logo">게시판</a>
+    </div>
+    <h1>관리자 페이지</h1>
+    <p th:text="${message}">메시지</p>
+    <pre th:text="${serverInfo}">서버 정보</pre>
+    <p><a href="/board/list">게시판으로</a> · <a href="/rsc">RSC API</a></p>
+</div>
+</body>
+</html>
