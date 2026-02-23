@@ -15,6 +15,7 @@ Spring Boot + MySQL 구성이며, Docker로 한 번에 실행할 수 있습니�
 ## 프로젝트 파일 구조
 
 ```
+vulnerable-board-web/
 ├── docker-compose.yml          # Docker Compose 정의 (MySQL + 앱)
 ├── Dockerfile                  # 앱 이미지 빌드 스크립트
 ├── docker-entrypoint.sh        # 컨테이너 기동 시 MySQL 대기 후 앱 실행
@@ -157,16 +158,24 @@ Spring Boot + MySQL 구성이며, Docker로 한 번에 실행할 수 있습니�
 
 ## 실행 방법 (Docker)
 
+많은 환경(Cursor, 일부 Windows 등)에서 `docker compose up -d --build` 실행 시 **gRPC 관련 오류**가 발생합니다.  
+이 경우 **`build.bat`** 으로 빌드한 뒤 컨테이너를 띄우세요.
+
 ```bash
-# 프로젝트 루트에서
-docker compose up -d --build
+# 프로젝트 루트에서 (권장)
+.\build.bat
+# 또는 CMD: build
 
 # 로그 확인
 docker compose logs -f app
 ```
 
-**Docker 빌드 시 `x-docker-expose-session-sharedkey` / gRPC 오류가 나면** (Cursor·일부 환경):  
-루트에서 **`build.bat`** 실행 후 빌드하세요. (PowerShell: `.\build.bat` / CMD: `build`)
+**gRPC 오류 나지 않는 환경**에서는 아래처럼 바로 실행해도 됩니다.
+
+```bash
+docker compose up -d --build
+docker compose logs -f app
+```
 
 - 웹 접속: **http://localhost:8888** — Spring Boot가 서빙하는 **React SPA** (빌드된 정적 파일).
 - 프론트 개발 서버: **http://localhost:5173** — React 게시판 앱 (Vite, API는 8888로 프록시).
