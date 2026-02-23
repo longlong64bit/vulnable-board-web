@@ -15,7 +15,6 @@ Spring Boot + MySQL 구성이며, Docker로 한 번에 실행할 수 있습니�
 ## 프로젝트 파일 구조
 
 ```
-01_내부_자체취약점/
 ├── docker-compose.yml          # Docker Compose 정의 (MySQL + 앱)
 ├── Dockerfile                  # 앱 이미지 빌드 스크립트
 ├── docker-entrypoint.sh        # 컨테이너 기동 시 MySQL 대기 후 앱 실행
