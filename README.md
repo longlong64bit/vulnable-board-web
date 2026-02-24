@@ -3,6 +3,8 @@
 취약점 점검을 위한 **의도적으로 취약한** 웹 애플리케이션입니다.  
 Spring Boot + MySQL 구성이며, Docker로 한 번에 실행할 수 있습니다.
 
+By. Cusor + Claude + ChatGPT
+
 ## 기능
 
 1. **회원가입 / 로그인**
