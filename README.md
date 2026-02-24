@@ -23,7 +23,7 @@ vulnerable-board-web/
 ├── read_excel.py               # (참고) 엑셀 시트 추출용 유틸
 ├── README.md                   # 본 문서
 ├── docs/
-│   └── VULNERABILITY_TEST_GUIDE.md   # 전자금융 평가기준별 테스트 가이드
+│   └── VULNERABILITY_TEST_GUIDE.md   # 웹 취약점 테스트 가이드
 ├── frontend/                   # Vue 3 SPA (Vite)
 │   ├── package.json
 │   ├── vite.config.js
@@ -41,7 +41,7 @@ vulnerable-board-web/
         │   │   ├── BoardController.java     # 게시판 CRUD
         │   │   ├── CommentController.java  # 댓글 API (AJAX)
         │   │   ├── FileController.java     # 파일 업로드/다운로드
-        │   │   └── VulnExtraController.java # 평가기준용 추가 취약 엔드포인트
+        │   │   └── VulnExtraController.java # 추가 취약 엔드포인트
         │   ├── entity/
         │   │   ├── Attachment.java          # 첨부파일 엔티티
         │   │   ├── Board.java               # 게시글 엔티티
@@ -85,13 +85,13 @@ vulnerable-board-web/
 |------|----------------|
 | **pom.xml** | Spring Boot 2.7.18, Java 17. 의존성: spring-boot-starter-web, jdbc, thymeleaf, mysql-connector-j, lombok. JAR 패키징으로 `vuln-board-*.jar` 생성. |
 | **README.md** | 프로젝트 소개, 실행 방법, 취약점 목록, 파일 구조, 파일별 설명(본 문서). |
-| **read_excel.py** | 전자금융 평가기준 엑셀에서 웹/모바일/HTS 시트 내용을 텍스트로 추출하는 참고용 스크립트. openpyxl 사용. |
+| **read_excel.py** | 엑셀 시트(웹/모바일/HTS 등) 내용을 텍스트로 추출하는 참고용 스크립트. openpyxl 사용. |
 
 ### docs
 
 | 파일 | 용도 및 기능 |
 |------|----------------|
-| **docs/VULNERABILITY_TEST_GUIDE.md** | 전자금융기반시설 보안취약점 평가기준(웹_모바일_HTS) 항목과 본 앱의 테스트 위치·방법 매핑. SQL Injection, XSS, 파일 업로드/다운로드, SSRF, OS명령, XXE, SSTI, 관리자 노출 등 시나리오 정리. |
+| **docs/VULNERABILITY_TEST_GUIDE.md** | 웹 취약점 평가 항목과 본 앱의 테스트 위치·방법 매핑. SQL Injection, XSS, 파일 업로드/다운로드, SSRF, OS명령, XXE, SSTI, 관리자 노출 등 시나리오 정리. |
 
 ### Java 소스 — 메인·설정
 
@@ -111,7 +111,7 @@ vulnerable-board-web/
 | **BoardController.java** | `/board/list`, `/view/{id}`, `/write`, `/edit/{id}`, `/delete/{id}`. 목록에서 `keyword`, `orderBy`를 쿼리 문자열에 연결해 SQL Injection 취약. 제목·내용을 뷰에서 `th:utext`로 출력해 Stored XSS 가능. 작성자만 수정/삭제 가능하나 첨부파일 다운로드는 별도 권한 검증 없음. |
 | **CommentController.java** | `/api/comment/list`, `/api/comment/add`, `/api/comment/delete/{id}`. JSON으로 댓글 목록·등록·삭제. 댓글 내용 검증/이스케이프 없이 저장·반환. 뷰에서 `innerHTML`로 넣어 Stored XSS 가능. |
 | **FileController.java** | `/file/upload`: 확장자·MIME·크기 제한 없이 업로드, `upload-dir`에 저장. `/file/download/{id}`: DB에서 첨부 조회 후 저장된 파일명으로 파일 전송(IDOR 가능). `/file/get?name=...`: `name`을 경로에 연결해 Path Traversal 취약. |
-| **VulnExtraController.java** | 평가기준용 추가 엔드포인트. `/admin`, `/redirect?url=`, `/fetch?url=`, `/cmd?exec=`, `/dir`, `/dir?path=`, `/debug`, `/ssti?name=`, `POST /xml` 등. |
+| **VulnExtraController.java** | 추가 취약 엔드포인트. `/admin`, `/redirect?url=`, `/fetch?url=`, `/cmd?exec=`, `/dir`, `/dir?path=`, `/debug`, `/ssti?name=`, `POST /xml` 등. |
 | **WebConfig.java** | `/uploads/**` 를 업로드 디렉터리로 매핑. **디렉토리 리스팅 허용** 설정(취약): `DirectoryListingResourceResolver` 등록으로 인덱스 파일 없을 때 `/uploads/` 접근 시 목록 HTML 출력. |
 | **DirectoryListingResourceResolver.java** | 정적 리소스가 디렉터리일 때 목록을 반환하는 리졸버. 웹 서버 설정 오류(리스팅 허용) 시뮬레이션. |
 | **DirectoryListingResource.java** | 디렉터리 목록 HTML을 생성하는 Resource 구현체. |
@@ -247,11 +247,11 @@ Python(Jinja2 등)과 달리 **Thymeleaf**는 **전처리(preprocessing)** `__${
 - **URL 인코딩**: `name`에 `+`, 공백, `'` 등이 있으면 `%2B`, `%20`, `%27` 등으로 인코딩해서 요청하세요.
 - **Python과의 차이**: Jinja2의 `{{ ... }}`와 달리 Thymeleaf는 `${...}`(일반 표현식)와 `__${...}__`(전처리로 한 번 더 평가)를 구분합니다. 본 앱은 `name`을 전처리 표현식에 넣어 SSTI가 성립하도록 구성했습니다.
 
-## 전자금융기반시설 보안취약점 평가기준(웹_모바일_HTS) 내부 테스트
+## 웹 취약점 테스트 가이드
 
-**전자금융기반시설_보안_취약점_평가기준(제2026-1호).xlsx** 의 **웹_모바일_HTS** 탭 항목에 맞춘 내부 테스트 가이드는 아래 문서를 참고하세요.
+웹 취약점 항목별 테스트 위치·방법은 아래 문서를 참고하세요.
 
-- **[docs/VULNERABILITY_TEST_GUIDE.md](docs/VULNERABILITY_TEST_GUIDE.md)** — 평가 항목별 테스트 위치·방법 매핑 및 시나리오
+- **[docs/VULNERABILITY_TEST_GUIDE.md](docs/VULNERABILITY_TEST_GUIDE.md)** — 항목별 테스트 위치·방법 매핑 및 시나리오
 
 ## 로컬에서만 실행 (Docker 없이)
 

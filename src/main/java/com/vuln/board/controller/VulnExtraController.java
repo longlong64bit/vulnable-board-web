@@ -27,7 +27,7 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
 /**
- * 전자금융기반시설 보안취약점 평가기준(웹/모바일/HTS) 대비 추가 취약 엔드포인트.
+ * 추가 취약 엔드포인트 (내부 점검용).
  * 내부 점검용으로만 사용할 것.
  */
 @Controller
